@@ -1,25 +1,97 @@
-// const width = 960;
-// const height = 500;
-const width = window.innerWidth; //window is optional, sometimes
+const { 
+        csv,
+        select,
+        scaleLinear,
+        min,
+        max,
+        extent,
+        axisLeft,
+        axisBottom
+    } = d3;
+
+const csvUrl = [
+    "https://gist.githubusercontent.com/", //url
+    "curran/", // user
+    "a08a1080b88344b0c8a7/", // Id of the Gist
+    "raw/0e7a9b0a5d22642a06d3d5b9bcbad9890c8ee534/", // commit
+    "iris.csv" // file name
+].join("");
+
+// console.log(csvUrl);
+
+// convert the numbers in strings to actual numbers
+const parseRow = d => {
+    d.sepal_length = +d.sepal_length;
+    d.sepal_width = +d.sepal_width;
+    d.petal_length = +d.petal_length;
+    d.petal_width = +d.petal_width;
+
+    return d;
+}
+
+const width = window.innerWidth;
 const height = window.innerHeight;
 
+const xValue = d => d.petal_length;
+const yValue = d => d.sepal_length;
+
+const margin = {
+    top: 20,
+    right: 20,
+    bottom: 40,
+    left: 50
+}
 
 
+// console.log(parseRow);
+const svg = select("body")
+                .append("svg")
+                .attr("width", width)
+                .attr('height', height);
 
-// const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-// svg.setAttribute("width", width)
-// svg.setAttribute("height", height)
-// document.body.appendChild(svg)
+const main = async () => {
+    const data = await csv(csvUrl, parseRow);
+    // console.log(data);
 
-// for (let i = 0; i < 100; i++)
-// {
-//     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-//     rect.setAttribute("x", i * 20);
-//     rect.setAttribute("width", 10);
-//     rect.setAttribute("height", height);
-//     svg.appendChild(rect);
-// }
+    const x = scaleLinear()
+            // .domain([min(data, xValue), max(data, xValue)]);
+            .domain(extent(data, xValue))
+            // .domain([0, max(data, xValue)])
+            // .range([0, width])
+            .range([margin.left, width - margin.right])
 
+    const y = scaleLinear()
+            // .domain([min(data, xValue), max(data, xValue)]);
+            .domain(extent(data, yValue))
+            // .range([height, 0])
+            .range([height - margin.bottom, margin.top])
 
+    const marks = data.map(d => ({
+        x: x(xValue(d)),
+        y: y(yValue(d))
+    }));
 
-// console.log(svg);
+    svg.selectAll("circle")
+        .data(marks)
+        .join("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 5);
+
+    svg.append("g")
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(axisLeft(y));
+
+    svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .call(axisBottom(x));
+
+    // console.log(marks);
+
+}
+
+main();
+
+// csv(csvUrl, parseRow).then(data => {
+//     console.log(data);
+// })

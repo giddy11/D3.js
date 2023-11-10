@@ -7,3 +7,6 @@ https://ft-interactive.github.io/visual-vocabulary/
 
 
 https://www.edfu2.com/sol-lewitt-a-life-of-ideas-book-review-2/
+
+
+https://observablehq.com/@d3/margin-convention
