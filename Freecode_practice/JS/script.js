@@ -1,13 +1,14 @@
+import { scatterPlot } from "./scatterPlot.js";
 const { 
-        csv,
-        select,
-        scaleLinear,
-        min,
-        max,
-        extent,
-        axisLeft,
-        axisBottom
-    } = d3;
+    csv,
+    select
+} = d3;
+
+// import { 
+//         csv,
+//         select,
+//     } from "../../node_modules/d3";
+
 
 const csvUrl = [
     "https://gist.githubusercontent.com/", //url
@@ -17,9 +18,6 @@ const csvUrl = [
     "iris.csv" // file name
 ].join("");
 
-// console.log(csvUrl);
-
-// convert the numbers in strings to actual numbers
 const parseRow = d => {
     d.sepal_length = +d.sepal_length;
     d.sepal_width = +d.sepal_width;
@@ -32,17 +30,6 @@ const parseRow = d => {
 const width = window.innerWidth;
 const height = window.innerHeight;
 
-const xValue = d => d.petal_length;
-const yValue = d => d.sepal_length;
-
-const margin = {
-    top: 20,
-    right: 20,
-    bottom: 40,
-    left: 50
-}
-
-
 // console.log(parseRow);
 const svg = select("body")
                 .append("svg")
@@ -50,48 +37,21 @@ const svg = select("body")
                 .attr('height', height);
 
 const main = async () => {
-    const data = await csv(csvUrl, parseRow);
-    // console.log(data);
-
-    const x = scaleLinear()
-            // .domain([min(data, xValue), max(data, xValue)]);
-            .domain(extent(data, xValue))
-            // .domain([0, max(data, xValue)])
-            // .range([0, width])
-            .range([margin.left, width - margin.right])
-
-    const y = scaleLinear()
-            // .domain([min(data, xValue), max(data, xValue)]);
-            .domain(extent(data, yValue))
-            // .range([height, 0])
-            .range([height - margin.bottom, margin.top])
-
-    const marks = data.map(d => ({
-        x: x(xValue(d)),
-        y: y(yValue(d))
-    }));
-
-    svg.selectAll("circle")
-        .data(marks)
-        .join("circle")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("r", 5);
-
-    svg.append("g")
-        .attr("transform", `translate(${margin.left}, 0)`)
-        .call(axisLeft(y));
-
-    svg.append("g")
-        .attr("transform", `translate(0, ${height - margin.bottom})`)
-        .call(axisBottom(x));
-
-    // console.log(marks);
-
-}
-
+    svg.call(
+        scatterPlot()
+        .width(width)
+        .height(height)
+        .data(await csv(csvUrl, parseRow))
+        
+        .xValue(d => d.petal_length)
+        .yValue(d => d.sepal_length)
+        .margin({
+            top: 20,
+            right: 20,
+            bottom: 40,
+            left: 50
+        })
+        .radius(5)
+    );
+};
 main();
-
-// csv(csvUrl, parseRow).then(data => {
-//     console.log(data);
-// })

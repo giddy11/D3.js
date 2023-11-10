@@ -1,0 +1,124 @@
+const { 
+        csv,
+        select,
+        scaleLinear,
+        min,
+        max,
+        extent,
+        axisLeft,
+        axisBottom
+    } = d3;
+
+const csvUrl = [
+    "https://gist.githubusercontent.com/", //url
+    "curran/", // user
+    "a08a1080b88344b0c8a7/", // Id of the Gist
+    "raw/0e7a9b0a5d22642a06d3d5b9bcbad9890c8ee534/", // commit
+    "iris.csv" // file name
+].join("");
+
+// console.log(csvUrl);
+
+// convert the numbers in strings to actual numbers
+const parseRow = d => {
+    d.sepal_length = +d.sepal_length;
+    d.sepal_width = +d.sepal_width;
+    d.petal_length = +d.petal_length;
+    d.petal_width = +d.petal_width;
+
+    return d;
+}
+
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const xValue = d => d.petal_length;
+const yValue = d => d.sepal_length;
+
+const margin = {
+    top: 20,
+    right: 20,
+    bottom: 40,
+    left: 50
+};
+
+const radius = 5;
+
+
+// console.log(parseRow);
+const svg = select("body")
+                .append("svg")
+                .attr("width", width)
+                .attr('height', height);
+
+const main = async () => {
+    const data = await csv(csvUrl, parseRow);
+    // console.log(data);
+
+    const x = scaleLinear()
+            // .domain([min(data, xValue), max(data, xValue)]);
+            .domain(extent(data, xValue))
+            // .domain([0, max(data, xValue)])
+            // .range([0, width])
+            .range([margin.left, width - margin.right])
+
+        // console.log(x.domain());
+        // console.log(x.range());
+
+
+    const y = scaleLinear()
+            // .domain([min(data, xValue), max(data, xValue)]);
+            .domain(extent(data, yValue))
+            // .range([height, 0])
+            .range([height - margin.bottom, margin.top])
+
+    // const marks = data.map(d => ({
+    //     x: x(xValue(d)),
+    //     y: y(yValue(d))
+    // }));
+
+    // const marks = data.map(d => {
+    //     return {
+    //         x: x(xValue(d)),
+    //         y: y(yValue(d))
+    //     } 
+    // });
+
+    const marks = data.map(function (d) {
+        return {
+            x: x(xValue(d)),
+            y: y(yValue(d))
+        }
+    });
+
+
+    svg.selectAll("circle")
+        .data(marks)
+        .join("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", radius);
+
+    
+
+    svg.append("g")
+        .attr(
+            "transform",
+            `translate(${margin.left}, 0)`)
+        .call(axisLeft(y));
+
+    svg.append("g")
+        .attr(
+            "transform",
+            `translate(0, ${height - margin.bottom})`)
+        .call(axisBottom(x));
+
+    console.log(marks);
+
+}
+
+main();
+
+// csv(csvUrl, parseRow).then(data => {
+//     console.log(data);
+// })
