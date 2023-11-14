@@ -52,7 +52,7 @@ d3.csv("Shots.csv", function(data) {
         return d.player
       })
       .rollup(function(v) {
-        return v.length
+        return v.length 
       })
       .entries(data)
 

@@ -1,0 +1,81 @@
+// import { axisBottom } from "d3-axis";
+// import { timeMonth } from "d3-time";
+// import { timeFormat } from "d3-time-format";
+
+// import {axisBottom, timeMonth, timeFormat} from "d3"
+
+// const { 
+//     scaleTime,
+//     scaleLinear,
+//     select,
+//     csv,
+//     extent,
+//     max,
+//     min
+// } = d3;
+
+
+// Set dimensions and margins for the chart
+const margin = {top: 70, right: 30, bottom: 40, left: 80};
+const width = window.innerWidth - margin.left - margin.right;
+const height = window.innerHeight - margin.top - margin.bottom;
+const svgWidth = width + margin.left + margin.right;
+const svgHeight = height + margin.top + margin.bottom;
+
+// Set up the x and y scales
+const x = d3.scaleTime()
+  .range([0, width]);
+
+const y = d3.scaleLinear()
+  .range([height, 0]);
+
+// Create the SVG element and append it to the chart container
+const svg = d3.select("#chart-container")
+
+svg.append("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+    .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+// Create a fake dataset
+d3.csv('date.csv', function(data) {
+    console.log(data);
+
+    // Define the x and y domains
+    x.domain(d3.extent(data, d => d.date));
+    y.domain([0, d3.max(data, d => d.value)]);
+
+    // Add the x-axis
+    svg.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(axisBottom(x))
+            .ticks(timeMonth.every(1))
+            .tickFormat(timeFormat("%b %Y"));
+
+    // Add the y-axis
+    svg.append("g")
+        .call(d3.axisLeft(y))
+
+    // Create the line generator
+    const line = d3.line()
+        .x(d => x(d[0]))
+        .y(d => y(d[1]));
+
+    // Add the line path to the SVG element
+
+svg.append("path")
+.datum(data)
+.attr("fill", "none")
+.attr("stroke", "steelblue")
+.attr("stroke-width", 1)
+.attr("d", line);
+    
+
+});
+
+// Add the y-axis
+
+// Create the line generator
+
+// Add the line path to the SVG element
